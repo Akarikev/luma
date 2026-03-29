@@ -12,6 +12,7 @@ from PIL import Image, ImageDraw
 
 ROOT = Path(__file__).resolve().parents[1]
 ICONS = ROOT / "src-tauri" / "icons"
+DOCS_ASSETS = ROOT / "docs" / "assets"
 SRC = 128
 
 
@@ -126,6 +127,22 @@ def main() -> None:
         ICONS / "128x128@2x.png", format="PNG"
     )
     print("updated icon.png, 32x32.png, 128x128.png, 128x128@2x.png")
+
+    # Docs site (GitHub Pages): favicons + hero mascot from same art as tray idle
+    DOCS_ASSETS.mkdir(parents=True, exist_ok=True)
+    idle_hi = draw_mascot("idle", SRC, with_shine=True)
+    idle_hi.resize((32, 32), Image.Resampling.LANCZOS).save(
+        DOCS_ASSETS / "favicon.png", format="PNG"
+    )
+    idle_hi.resize((180, 180), Image.Resampling.LANCZOS).save(
+        DOCS_ASSETS / "apple-touch-icon.png", format="PNG"
+    )
+    idle_hi.resize((320, 320), Image.Resampling.LANCZOS).save(
+        DOCS_ASSETS / "mascot-hero.png", format="PNG"
+    )
+    print(
+        "wrote docs/assets/favicon.png, apple-touch-icon.png, mascot-hero.png"
+    )
 
 
 if __name__ == "__main__":
