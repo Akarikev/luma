@@ -83,9 +83,4 @@ bun tauri build
 ```
 
 
-- [VS Code](https://code.visualstudio.com/) + [Tauri](https://
-marketplace.visualstudio.com/items?itemName=tauri-apps.
-tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.
-com/items?itemName=rust-lang.rust-analyzer)
-
 Outputs are under `src-tauri/target/release/bundle/`. For day-to-day work with tray and storage, use `bun tauri dev` (a browser-only `vite` dev server is not the full app).
