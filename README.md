@@ -2,6 +2,9 @@
 
 **Luma** is a compact Linux desktop app for everyday focus: a **Pomodoro-style timer**, **tasks**, **clipboard history**, and a quick **system stats** readout. It lives in the **system tray**—open it from the tray when you need it, or pin the window so it stays visible.
 
+
+![Version](https://img.shields.io/badge/version-0.1.0-violet)
+
 ---
 
 ## Download
@@ -78,5 +81,11 @@ For developers who prefer to compile: install [Bun](https://bun.sh), [Rust](http
 bun install
 bun tauri build
 ```
+
+
+- [VS Code](https://code.visualstudio.com/) + [Tauri](https://
+marketplace.visualstudio.com/items?itemName=tauri-apps.
+tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.
+com/items?itemName=rust-lang.rust-analyzer)
 
 Outputs are under `src-tauri/target/release/bundle/`. For day-to-day work with tray and storage, use `bun tauri dev` (a browser-only `vite` dev server is not the full app).
