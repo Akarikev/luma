@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Luma — Focus, tasks, tray companion</title>
+    <meta
+      name="description"
+      content="A compact desktop productivity app: Pomodoro-style timer, tasks, clipboard history, and system stats."
+    />
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #0d0d0f;
+        --card: #111113;
+        --border: #222226;
+        --muted: #71717a;
+        --text: #f4f4f5;
+        --accent: #7c3aed;
+        --accent-dim: #a78bfa;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family:
+          "Inter",
+          system-ui,
+          -apple-system,
+          sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.5;
+        -webkit-font-smoothing: antialiased;
+      }
+      .wrap {
+        max-width: 40rem;
+        margin: 0 auto;
+        padding: 3rem 1.5rem 4rem;
+      }
+      h1 {
+        font-size: 1.75rem;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+        margin: 0 0 0.5rem;
+      }
+      .lead {
+        color: var(--muted);
+        font-size: 1.05rem;
+        margin: 0 0 2rem;
+      }
+      .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 1rem;
+        padding: 1.25rem 1.5rem;
+        margin-bottom: 1rem;
+      }
+      .card h2 {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: var(--muted);
+        margin: 0 0 0.75rem;
+        font-weight: 600;
+      }
+      ul {
+        margin: 0;
+        padding-left: 1.1rem;
+        color: #d4d4d8;
+      }
+      li {
+        margin: 0.35rem 0;
+      }
+      .cta {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 1.5rem;
+        padding: 0.65rem 1.1rem;
+        border-radius: 0.65rem;
+        background: var(--accent);
+        color: #fff;
+        text-decoration: none;
+        font-weight: 500;
+        font-size: 0.9rem;
+      }
+      .cta:hover {
+        filter: brightness(1.08);
+      }
+      .secondary {
+        display: inline-block;
+        margin-top: 0.75rem;
+        margin-left: 0.75rem;
+        color: var(--accent-dim);
+        font-size: 0.88rem;
+      }
+      footer {
+        margin-top: 3rem;
+        font-size: 0.8rem;
+        color: var(--muted);
+      }
+      footer a {
+        color: var(--accent-dim);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <h1>Luma</h1>
+      <p class="lead">
+        A compact tray-first desktop app for focus sessions, tasks, clipboard history, and a quick
+        glance at system stats—built with Tauri and React.
+      </p>
+
+      <div class="card">
+        <h2>Features</h2>
+        <ul>
+          <li>Pomodoro-style focus timer with break sessions</li>
+          <li>Tasks with optional reminders</li>
+          <li>Clipboard history</li>
+          <li>Lightweight system stats</li>
+          <li>Settings: simple task mode, notifications, panels, data folder</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h2>Get it</h2>
+        <p style="margin: 0; color: #d4d4d8; font-size: 0.92rem">
+          Replace the link below with your real GitHub org/user and repo name, then enable GitHub
+          Pages from the <code>docs</code> folder if you want this page public.
+        </p>
+        <a class="cta" href="https://github.com/YOUR_GITHUB_USER/luma/releases">Download releases</a>
+        <a class="secondary" href="https://github.com/YOUR_GITHUB_USER/luma">Source code</a>
+      </div>
+
+      <footer>
+        This page is static HTML in <code>docs/index.html</code>—no Next.js required.
+      </footer>
+    </div>
+  </body>
+</html>

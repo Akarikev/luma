@@ -1,0 +1,30 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Default capabilities for Luma",
+  "windows": ["main"],
+  "permissions": [
+    "core:default",
+    "core:window:allow-show",
+    "core:window:allow-hide",
+    "core:window:allow-set-focus",
+    "core:window:allow-set-position",
+    "core:window:allow-is-visible",
+    "core:window:allow-outer-size",
+    "core:window:allow-primary-monitor",
+    "notification:default",
+    "notification:allow-request-permission",
+    "notification:allow-is-permission-granted",
+    "clipboard-manager:default",
+    "clipboard-manager:allow-read-text",
+    "clipboard-manager:allow-write-text",
+    "store:default",
+    "store:allow-load",
+    "store:allow-save",
+    "store:allow-get",
+    "store:allow-set",
+    "store:allow-delete",
+    "store:allow-clear",
+    "opener:default"
+  ]
+}

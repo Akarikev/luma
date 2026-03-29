@@ -1,0 +1,62 @@
+# Build installable bundles when you push a version tag (e.g. v0.1.0).
+# Creates (or updates) a GitHub Release with draft=true so you can edit notes before publishing.
+
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  release:
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: ubuntu-22.04
+            args: ""
+
+    runs-on: ${{ matrix.platform }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install Linux dependencies
+        if: matrix.platform == 'ubuntu-22.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev \
+            libayatana-appindicator3-dev \
+            librsvg2-dev \
+            patchelf \
+            libssl-dev \
+            build-essential \
+            curl \
+            wget \
+            file
+
+      - name: Rust stable
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install frontend deps
+        run: bun install
+
+      - uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          projectPath: src-tauri
+          tagName: ${{ github.ref_name }}
+          releaseName: "Luma ${{ github.ref_name }}"
+          releaseBody: "Install on Linux from the attached bundles. See the repo README for runtime dependencies (e.g. tray / AppIndicator)."
+          releaseDraft: true
+          prerelease: false
+          args: ${{ matrix.args }}
