@@ -32,6 +32,6 @@ See the repo [README](../README.md) — tray / AppIndicator libraries and option
 
 ### Changelog
 
-**Full Changelog:** `https://github.com/Akarikev/luma/compare/vPREVIOUS...vCURRENT` (replace tags, e.g. `v0.1.0...v0.1.1`).
+**Full Changelog:** `https://github.com/Akarikev/luma/compare/vPREVIOUS...vCURRENT` (replace tags, e.g. `v0.1.1...v0.1.2`).
 
 - …

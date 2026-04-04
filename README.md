@@ -3,7 +3,7 @@
 **Luma** is a compact Linux desktop app for everyday focus: a **Pomodoro-style timer**, **tasks**, **clipboard history**, and a quick **system stats** readout. It lives in the **system tray**—open it from the tray when you need it, or pin the window so it stays visible.
 
 
-![Version](https://img.shields.io/badge/version-0.1.1-violet)
+![Version](https://img.shields.io/badge/version-0.1.2-violet)
 
 ---
 

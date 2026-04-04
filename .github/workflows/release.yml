@@ -1,4 +1,4 @@
-# Build installable bundles when you push a version tag (e.g. v0.1.1).
+# Build installable bundles when you push a version tag (e.g. v0.1.2).
 # Creates (or updates) a GitHub Release with draft=true so you can edit notes before publishing.
 #
 # Architecture: the Linux job runs on ubuntu-22.04 (GitHub-hosted x86_64). Bundles are x86_64;
