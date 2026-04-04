@@ -1,5 +1,9 @@
-# Build installable bundles when you push a version tag (e.g. v0.1.0).
+# Build installable bundles when you push a version tag (e.g. v0.1.1).
 # Creates (or updates) a GitHub Release with draft=true so you can edit notes before publishing.
+#
+# Architecture: the Linux job runs on ubuntu-22.04 (GitHub-hosted x86_64). Bundles are x86_64;
+# Debian/Ubuntu package arch is "amd64" — same ISA as x86_64. For optional release copy, see
+# .github/RELEASE_NOTES_TEMPLATE.md
 
 name: Release
 
@@ -15,6 +19,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        # ubuntu-22.04 runners are x86_64; bundles target x86_64 / Debian "amd64" (same ISA).
         include:
           - platform: ubuntu-22.04
             args: ""
@@ -55,8 +60,8 @@ jobs:
         with:
           projectPath: src-tauri
           tagName: ${{ github.ref_name }}
-          releaseName: "Luma ${{ github.ref_name }}"
-          releaseBody: "Install on Linux from the attached bundles. See the repo README for runtime dependencies (e.g. tray / AppIndicator)."
+          releaseName: "Luma ${{ github.ref_name }} (Linux x86_64 / amd64)"
+          releaseBody: "Install on Linux x86_64 (Debian/Ubuntu **amd64** is the same architecture) from the attached bundles. See the repo README for runtime dependencies (e.g. tray / AppIndicator)."
           releaseDraft: true
           prerelease: false
           args: ${{ matrix.args }}
