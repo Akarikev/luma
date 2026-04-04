@@ -1,11 +1,18 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { FolderOpen, Settings, Trash2, BellRing } from "lucide-react";
+import { FolderOpen, Settings, Trash2, BellRing, RefreshCw } from "lucide-react";
+import { getVersion } from "@tauri-apps/api/app";
+import { openUrl } from "@tauri-apps/plugin-opener";
 import { useSettings } from "../hooks/useSettings";
 import { clearEntireStore } from "../lib/store";
 import { revealLumaStoreInExplorer } from "../lib/dataPaths";
 import { notify } from "../lib/notifications";
 import { SectionCard } from "./SectionCard";
+import {
+  checkForAppUpdate,
+  RELEASES_LATEST_URL,
+  updateAvailableNotificationBody,
+} from "../lib/updateCheck";
 import type { DurationUnitPreference } from "../types";
 
 type Props = {
@@ -93,6 +100,50 @@ function SegmentedUnit({
 export function SettingsPanel({ open, onClose }: Props) {
   const { settings, hydrated, updateSettings } = useSettings();
   const [clearBusy, setClearBusy] = useState(false);
+  const [appVersion, setAppVersion] = useState<string | null>(null);
+  const [checkBusy, setCheckBusy] = useState(false);
+  const [checkHint, setCheckHint] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    let cancelled = false;
+    void (async () => {
+      try {
+        const v = await getVersion();
+        if (!cancelled) setAppVersion(v);
+      } catch {
+        if (!cancelled) setAppVersion(null);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [open]);
+
+  const handleCheckUpdates = useCallback(async () => {
+    setCheckHint(null);
+    try {
+      const v = await getVersion();
+      setAppVersion(v);
+      setCheckBusy(true);
+      const result = await checkForAppUpdate(v, { ignoreDismissed: true });
+      if (result.status === "available") {
+        setCheckHint(`New release: ${result.latestTag}`);
+      } else if (result.status === "current") {
+        setCheckHint("You're on the latest public release.");
+      } else {
+        setCheckHint("Could not compare versions (offline or GitHub unavailable).");
+      }
+    } catch {
+      setCheckHint("Could not read app version.");
+    } finally {
+      setCheckBusy(false);
+    }
+  }, []);
+
+  const handleOpenReleases = useCallback(() => {
+    void openUrl(RELEASES_LATEST_URL);
+  }, []);
 
   const handleRevealData = useCallback(async () => {
     try {
@@ -120,11 +171,15 @@ export function SettingsPanel({ open, onClose }: Props) {
     void notify("Luma", "Test notification — reminders use the same channel.");
   }, []);
 
+  const testUpdateNotification = useCallback(() => {
+    void notify("Luma", updateAvailableNotificationBody("v0.0.0 (preview)"));
+  }, []);
+
   return (
     <AnimatePresence>
       {open && (
         <motion.div
-          className="fixed inset-0 z-[200] flex items-center justify-center p-4"
+          className="absolute inset-0 z-[200] flex items-center justify-center p-4"
           style={{ background: "rgba(0,0,0,0.65)" }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -138,11 +193,11 @@ export function SettingsPanel({ open, onClose }: Props) {
             role="dialog"
             aria-modal="true"
             aria-labelledby="settings-title"
-            className="w-full max-w-md max-h-[min(560px,85vh)] overflow-y-auto rounded-2xl shadow-2xl"
+            className="w-full max-w-md max-h-[min(560px,85vh)] overflow-y-auto rounded-2xl"
             style={{
               background: "#0d0d0f",
               border: "1px solid #2a2a2e",
-              boxShadow: "0 32px 64px rgba(0,0,0,0.85)",
+              filter: "drop-shadow(0 24px 48px rgba(0,0,0,0.8))",
             }}
             initial={{ opacity: 0, y: 12, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -265,6 +320,69 @@ export function SettingsPanel({ open, onClose }: Props) {
                   onChange={(v) => updateSettings({ companionAmbientChatter: v })}
                   disabled={!hydrated}
                 />
+              </SectionCard>
+
+              <SectionCard title="About" icon={null}>
+                <p className="text-[11px] mb-2 leading-snug" style={{ color: "#71717a" }}>
+                  We alert you when a newer release exists (desktop notification if allowed, plus a
+                  banner in this window). Check below anytime. To update, use the{' '}
+                  <a
+                    href={RELEASES_LATEST_URL}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="underline-offset-2 hover:underline"
+                    style={{ color: "#a78bfa" }}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      void openUrl(RELEASES_LATEST_URL);
+                    }}
+                  >
+                    downloads page
+                  </a>
+                  {'. '} Same install steps as the first time.
+                </p>
+                <p className="text-xs font-medium mb-2" style={{ color: "#e4e4e7" }}>
+                  {appVersion ? `Version ${appVersion}` : "Version —"}
+                </p>
+                <div className="flex flex-col gap-2">
+                  <button
+                    type="button"
+                    disabled={checkBusy}
+                    onClick={() => void handleCheckUpdates()}
+                    className="flex items-center justify-center gap-2 text-xs font-medium py-2 rounded-lg cursor-pointer disabled:opacity-50"
+                    style={{
+                      background: "#1e1e22",
+                      color: "#e4e4e7",
+                      border: "1px solid #2a2a2e",
+                    }}
+                  >
+                    <RefreshCw size={14} className={checkBusy ? "animate-spin" : ""} />
+                    Check for updates
+                  </button>
+                  {checkHint && (
+                    <p className="text-[11px] leading-snug" style={{ color: "#a1a1aa" }}>
+                      {checkHint}
+                    </p>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => void handleOpenReleases()}
+                    className="text-[11px] font-medium py-1.5 rounded-lg cursor-pointer"
+                    style={{ color: "#a78bfa" }}
+                  >
+                    Open downloads page
+                  </button>
+                  {import.meta.env.DEV && (
+                    <button
+                      type="button"
+                      onClick={() => void testUpdateNotification()}
+                      className="text-[11px] font-medium py-2 rounded-lg cursor-pointer text-left"
+                      style={{ color: "#71717a", border: "1px dashed #3f3f46" }}
+                    >
+                      Preview update notification (dev)
+                    </button>
+                  )}
+                </div>
               </SectionCard>
 
               <SectionCard title="Data" icon={null}>

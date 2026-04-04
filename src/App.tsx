@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Minimize2, Pin, PinOff, Settings } from "lucide-react";
+import { BadgeAlert, Minimize2, Pin, PinOff, Settings } from "lucide-react";
+import { getVersion } from "@tauri-apps/api/app";
 import { getCurrentWindow } from "@tauri-apps/api/window";
+import { openUrl } from "@tauri-apps/plugin-opener";
 import { FocusedTaskHint } from "./components/FocusedTaskHint";
 import { LumaMascotIcon } from "./components/LumaMascotIcon";
 import { PomodoroTimer } from "./components/PomodoroTimer";
@@ -10,7 +12,16 @@ import { TasksProvider } from "./hooks/useTasks";
 import { ClipboardHistory } from "./components/ClipboardHistory";
 import { SystemStats } from "./components/SystemStats";
 import { SettingsPanel } from "./components/SettingsPanel";
+import { UpdateBanner } from "./components/UpdateBanner";
 import { useSettings } from "./hooks/useSettings";
+import {
+  getNotifiedReleaseTag,
+  getUpdateUiState,
+  RELEASES_LATEST_URL,
+  setNotifiedReleaseTag,
+  updateAvailableNotificationBody,
+} from "./lib/updateCheck";
+import { notify } from "./lib/notifications";
 import { storeGet, storeSet } from "./lib/store";
 import { subscribePomodoroMode } from "./lib/pomodoroBridge";
 import { syncPinWindow } from "./lib/tauri";
@@ -25,6 +36,10 @@ export default function App() {
   const [pinned, setPinned] = useState(false);
   const [pinReady, setPinReady] = useState(false);
   const [pomodoroMode, setPomodoroMode] = useState<PomodoroMode>("idle");
+  const [updateAvailableTag, setUpdateAvailableTag] = useState<string | null>(
+    null
+  );
+  const [showUpdateBanner, setShowUpdateBanner] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -50,6 +65,42 @@ export default function App() {
     return subscribePomodoroMode(setPomodoroMode);
   }, []);
 
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const v = await getVersion();
+        const state = await getUpdateUiState(v);
+        if (cancelled || !state) {
+          if (!cancelled) {
+            setUpdateAvailableTag(null);
+            setShowUpdateBanner(false);
+          }
+          return;
+        }
+        const { latestTag, showBanner } = state;
+        if (getNotifiedReleaseTag() !== latestTag) {
+          await notify("Luma", updateAvailableNotificationBody(latestTag));
+          setNotifiedReleaseTag(latestTag);
+        }
+        setUpdateAvailableTag(latestTag);
+        setShowUpdateBanner(showBanner);
+      } catch {
+        if (!cancelled) {
+          setUpdateAvailableTag(null);
+          setShowUpdateBanner(false);
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const openDownloadsPage = useCallback(() => {
+    void openUrl(RELEASES_LATEST_URL);
+  }, []);
+
   const togglePin = useCallback(async () => {
     const next = !pinned;
     setPinned(next);
@@ -73,19 +124,26 @@ export default function App() {
 
   return (
     <TasksProvider>
-    <div className="w-full h-full" style={{ background: "transparent" }}>
+    <div className="relative w-full h-full min-h-0" style={{ background: "transparent" }}>
       <motion.div
         initial={{ opacity: 0, y: 16, scale: 0.97 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.18, ease: [0.25, 0.46, 0.45, 0.94] }}
-        className="w-full h-full flex flex-col rounded-2xl overflow-hidden"
+        className="relative z-0 w-full h-full flex flex-col rounded-2xl"
         style={{
           background: "#0d0d0f",
           border: "1px solid #1e1e22",
-          boxShadow:
-            "0 32px 64px rgba(0,0,0,0.9), 0 0 0 1px rgba(124,58,237,0.06)",
+          filter:
+            "drop-shadow(0 32px 48px rgba(0,0,0,0.88)) drop-shadow(0 12px 28px rgba(0,0,0,0.55))",
         }}
       >
+        <div className="flex flex-col flex-1 min-h-0 overflow-hidden rounded-2xl">
+        {showUpdateBanner && updateAvailableTag && (
+          <UpdateBanner
+            latestTag={updateAvailableTag}
+            onDismiss={() => setShowUpdateBanner(false)}
+          />
+        )}
         <div
           className="flex items-center justify-between px-4 py-3 shrink-0"
           style={{ borderBottom: "1px solid #1a1a1e" }}
@@ -113,6 +171,30 @@ export default function App() {
           </div>
 
           <div className="flex items-center gap-1 shrink-0">
+            {updateAvailableTag && (
+              <button
+                type="button"
+                onClick={openDownloadsPage}
+                aria-label={`New version ${updateAvailableTag} available, open downloads page`}
+                title={`New version ${updateAvailableTag} is available — click to open downloads`}
+                className="p-1.5 rounded-lg transition-colors cursor-pointer"
+                style={{
+                  background: "transparent",
+                  color: "#f59e0b",
+                }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLElement).style.background = "#422006";
+                  (e.currentTarget as HTMLElement).style.color = "#fbbf24";
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLElement).style.background =
+                    "transparent";
+                  (e.currentTarget as HTMLElement).style.color = "#f59e0b";
+                }}
+              >
+                <BadgeAlert size={15} aria-hidden />
+              </button>
+            )}
             <button
               type="button"
               onClick={() => setSettingsOpen(true)}
@@ -197,9 +279,10 @@ export default function App() {
           {settings.showClipboard && <ClipboardHistory />}
           {settings.showSystemStats && <SystemStats />}
         </div>
+        </div>
       </motion.div>
+      <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} />
     </div>
-    <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} />
     </TasksProvider>
   );
 }

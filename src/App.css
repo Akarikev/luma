@@ -18,6 +18,14 @@
     -webkit-font-smoothing: antialiased;
   }
 
+  /* Single rounded clip for the webview so overlays and shell share the same corner shape (WebKitGTK). */
+  #root.luma-root {
+    position: relative;
+    border-radius: 1rem;
+    overflow: hidden;
+    isolation: isolate;
+  }
+
   ::-webkit-scrollbar {
     width: 4px;
   }
